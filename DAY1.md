@@ -57,7 +57,7 @@ I will be kickstarting this team. (3/4 ppl to make pattern, 2 ppl to cut, 2 ppl 
 
 # Projection + software team
 
-5 ppl (2 for rig, 3 for projection mapping experiments)
+5 ppl (2 for rig, 6 for projection mapping experiments)
 
 - Your job will be to:
     - build the mirror projection rig
