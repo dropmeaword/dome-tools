@@ -1,11 +1,11 @@
 Make a dome together, the dome has to be up by Thursday around lunch time.
 
-[See week schedule here in this google document](https://goo.gl/SNCe5N).
+[See week schedule in this shared spreadsheet](https://goo.gl/SNCe5N).
 
 Think of it as a planetarium, a 360 degree screen to do projections of 360 content.
 
-The dome has two distinct parts:
-1. The geodesic structure (the things made out of sticks)
+The dome has two distinct parts (see 1:10 scale model):
+1. The geodesic structure (the thing made out of sticks)
 2. The hemispherical screen (the textile screen that hangs from it)
 
 # Geodesic dome structure
