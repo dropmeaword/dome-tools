@@ -65,9 +65,9 @@ I will be kickstarting this team. (3/4 ppl to make pattern, 2 ppl to cut, 2 ppl 
     - experiment with different softwares to map the projection to the dome
 
 *GOALS FOR THE DAY:*
-    - *MAKE A SIMPLE RIG FOR THE BEAMER + MIRROR*
-    - *CREATE A CALIBRATION PATTERN*
-    - *HAVE ONE METHOD TO SHOW 360 PICTURES, ONE METHOD TO SHOW 360 VIDEO, ONE METHOD TO HAVE 3D CONTENT*
+- *MAKE A SIMPLE RIG FOR THE BEAMER + MIRROR*
+- *CREATE A CALIBRATION PATTERN*
+- *HAVE ONE METHOD TO SHOW 360 PICTURES, ONE METHOD TO SHOW 360 VIDEO, ONE METHOD TO HAVE 3D CONTENT*
 
 Sander, can you help? (Processing + Syphon)
 Team can start by reading the materials in the USB stick and googling for things.
