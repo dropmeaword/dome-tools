@@ -1,0 +1,317 @@
+<!doctype html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>textile dome calculator</title>
+	<meta name="author" content="Luis Rodil-Fernandez" />
+	<meta name="description" content="calculate textile metrage for a textile dome" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="node_modules/paper/dist/paper-full.min.js"></script>
+    <script src="node_modules/svg.js/dist/svg.min.js"></script>
+    
+    <!-- sourced from CDNs -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+
+    <style>
+        .wrapper {
+            margin: 100px 40px 10px 40px;
+        }
+
+        .row {
+            display: flex;
+        }
+        
+        .column {
+            flex: 50%;
+        }
+
+        #frmParams {
+            width: 500px;
+        }
+
+        .json {
+            font-size: 10pt;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: gray;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // number of segments to skip at the top of the gore
+        // this is needed because
+        // if we don't skip any, the gore pattern will be drawn until
+        // the apex point of the dome, making sewing impossible
+        // because all the gores will meet at the same point in space
+        // we need to skip a few segments in our calculation, to leave a 
+        // hole at the top of the dome that we will cover by sewing a 
+        // circle onto it
+        var skip = 3; // skip should = 3 for a better finish
+
+        function draw_gore(res, pos) {
+            // top-center coordinate
+            var c = pos;
+
+            // store beginning and end y-position of our guideline
+            var topy = 0;
+            var bottomy = 0;
+
+            // prepare scene graph
+            var seaml = new paper.Path();
+            seaml.strokeColor = 'blue';
+            var seamr = new paper.Path();
+            seamr.strokeColor = 'blue';
+
+            var cutl = new paper.Path();
+            cutl.strokeColor = 'red';
+            var cutr = new paper.Path();
+            cutr.strokeColor = 'red';
+
+            gorestep = res['GORE STEP'];
+            reflength = res['REFERENCE LENGTH']; // full length from apex point to bottom
+            goreinc = reflength * gorestep;
+            GL = reflength - (goreinc * skip); // gore length
+            lens = res['GORE SKELETON'];
+            gores = res['GORES'];
+
+            var seam = res['SEAM'];
+
+            // draw top reference line
+            var reftop = paper.Path.Line(new paper.Point(c.x-20, c.y), new paper.Point(c.x+20, c.y));
+            reftop.strokeColor = '#000000';
+            // and a text
+            var text = new paper.PointText(new paper.Point(c.x, c.y-5));
+            text.justification = 'center';
+            text.fillColor = 'black';
+            text.fontSize = '5pt';
+            text.content = "apex reference";
+
+            // draw segments of the gore
+            for(i = skip; i < lens.length; i++) {
+                //console.log("iter: " + i);
+                x1 = c.x + (lens[i] / 2);
+                x2 = c.x - (lens[i] / 2);
+                y = c.y + (i*goreinc);
+                //draw.line(x1, y, x2, y).stroke(style);
+
+                var l = paper.Path.Line(new paper.Point(x1, y), new paper.Point(x2, y));
+                l.strokeColor = '#a0a0a0';
+
+                seaml.add(new paper.Point(x1, y));
+                seamr.add(new paper.Point(x2, y));
+
+                if(i > skip) {
+                    xx1 = x1+seam;
+                    xx2 = x2-seam;
+
+                    py = c.y + ((i-1)*goreinc);
+                    bottomy = y; // change the current bottomy
+
+                    //console.log("point: " + xx1 + " " + xx2);
+                    cutr.add(new paper.Point(xx1, y));
+                    cutl.add(new paper.Point(xx2, y));
+
+                    var l = paper.Path.Line(new paper.Point(c.x, py), new paper.Point(c.x, y));
+                    l.strokeColor = '#a0a0a0';
+
+                    draw_segment_label(new paper.Point(xx2+20, y-2), Math.round(lens[i]));
+                } else {
+                    cutr.add(new paper.Point(x1, y));
+                    cutl.add(new paper.Point(x2, y));
+                    topy = y;
+                }
+            }
+
+            draw_length_guideline(res, c.x+100, topy, bottomy);
+        } // print_gore
+
+        function draw_segment_label(pos, label) {
+            var text = new paper.PointText(pos);
+            text.justification = 'center';
+            text.fillColor = 'black';
+            text.fontSize = '5pt';
+            text.content = label;
+        }
+
+        function draw_length_guideline(res, posx, topy, bottomy) {
+            // draw length guideline
+            var text = new paper.PointText(new paper.Point(posx+10, topy+200));
+            text.justification = 'center';
+            text.fillColor = '#a0a0a0';
+            text.fontSize = '12pt';
+            text.rotate(90);
+            text.content = Math.round(GL) + " gore length";
+
+            var l = paper.Path.Line(new paper.Point(posx, topy), new paper.Point(posx, bottomy));
+            l.strokeColor = '#a0a0a0';
+        }
+
+        function draw_text(res, pos) {
+            // print calculations in plain text
+            var ypos = pos.y;
+            var xpos = pos.x;
+
+            var txt = gores + " gores must be cut in total\n";
+            txt += "Gore max width = " + Math.round(res['GORE WIDTH']) + "\n";
+            txt += "Gore length = " + Math.round(GL) + "\n";
+            txt += "Length from apex = " + Math.round(res['REFERENCE LENGTH']) + "\n";
+            //txt += "Segment length = " + (res['REFERENCE LENGTH'] * res['GORE STEP']) + "\n";
+
+            var matmeters = (GL * gores) + ((GL * gores) * 0.05);
+            txt += "Total material in cm " + Math.round(matmeters) + " (+5%) \n";
+
+            var text = new paper.PointText(new paper.Point(xpos, ypos));
+            text.justification = 'left';
+            text.fillColor = 'black';
+            text.fontSize = '12pt';
+            text.content = txt;
+        }
+
+        function visualize(res) {
+            // choose the DOM element we will use as canvas
+            var canvas = document.getElementById('sketch');
+
+            // create an empty scenegraph for this canvas
+            paper.setup(canvas);
+
+            // paint stuff on the scenegraph
+            draw_gore(res, new paper.Point(100, 20));
+            draw_text(res, new paper.Point(340, 20));
+
+            // draw entire scene graph
+            paper.view.draw();
+
+            // trigger browser render
+            var event = new Event('model-ready');
+            document.dispatchEvent(event);
+        }
+
+        /*
+        function visualize(res) {
+            var draw = SVG('drawing').size('210mm', '297mm').style({'background': '#808080'});
+        
+            gorestep = res['GORE STEP'];
+            GL = res['GORE LENGTH'];
+            goreinc = GL * gorestep;
+
+            style = { width: 1 }
+            lens = res['GORE SKELETON'];
+
+            for(i = 0; i < lens.length; i++) {
+                x1 = 100 - (lens[i] / 2);
+                x2 = 100 + (lens[i] / 2);
+                y = (i*goreinc);
+                draw.line(x1, y, x2, y).stroke(style);
+            }
+        }
+        */
+
+        function calculate() {
+            var res = {};
+        
+            var f = document.getElementById("frmParams");
+            
+            var R = parseInt(f.elements['domeRad'].value);
+            var MATW   = parseInt(f.elements['materialWidth'].value);
+            var SA   = parseInt(f.elements['seamAllowance'].value);
+            skip =  parseInt(f.elements['skipSegments'].value);
+
+            res['SEAM'] = SA;
+        
+            C = 2*Math.PI*R;
+            res['C'] = C;
+            // calculate gore length
+            // GL = C / 4; // gore length here is calculated on the basis of a quater-circle
+            // 5/8 domes are cut bellow the middle ring, so the gores ought to be a little longer
+            // to meet the base
+            // 5/8 stands for the section of a dome (half a sphere)
+            // because our C is total circumference we divide it in 16 equals sections and 
+            // we take 5 as the gore length
+            RL = C * (5/16);
+
+            res['REFERENCE LENGTH'] = RL;
+        
+            gorew = C / (MATW-(2*SA));
+            gores = Math.floor(gorew);
+            if(gorew > Math.floor(gorew)) { gores = gores + 1; }
+        
+            res['GORES'] = gores;
+            res['GORE WIDTH'] = C / gores;
+        
+            gorestep = 0.05;  //  = (1 / number of vertical segments)
+            goreinc = RL * gorestep;
+            res['GORE STEP'] = gorestep;
+        
+            res['GORE SKELETON'] = [];
+            for(l = 0; l < RL; l += goreinc) {
+                theta = l / R;
+                R1 = R * Math.sin(theta);
+                C1 = 2*Math.PI*R1;
+                W1 = C1 / gores;
+                res['GORE SKELETON'].push(W1);
+            }
+        
+            //document.getElementById("results").innerHTML = "<pre>"+JSON.stringify(res)+"</pre>";
+        
+            visualize(res);
+        }
+
+        // on event
+        document.addEventListener('model-ready', function (e) {
+            document.getElementById("download").disabled = false; 
+            document.getElementById("download").onclick = function(){
+                var fileName = "custom.svg"
+                var url = "data:image/svg+xml;utf8," + encodeURIComponent(paper.project.exportSVG({asString:true}));
+                var link = document.createElement("a");
+                link.download = fileName;
+                link.href = url;
+                link.click();
+               }
+        }, false);
+
+        </script>
+
+<div class="wrapper">
+	<header>
+        <h1>textile 5/8 dome calculator</h1>
+    </header>
+
+        <div class="row">
+        <div class="column">
+            <form id="frmParams" role="params" onsubmit="calculate();" class="pure-form pure-form-aligned">
+                <fieldset>
+                <div class="pure-control-group">
+                    <label for="domeRad">dome radius</label>
+                    <input type="text" id="domeRad" placeholder="250" value="250" />
+                    <span class="pure-form-message-inline">in cm</span>
+                    
+                    <label for="materialWidth">material width</label>
+                    <input type="text" id="materialWidth" placeholder="150" value="150" />
+                    <span class="pure-form-message-inline">in cm</span>
+
+                    <label for="seamAllowance">seam allowance</label>
+                    <input type="text" id="seamAllowance" placeholder="10" value="10" />
+                    <span class="pure-form-message-inline">in cm</span>
+
+                    <label for="skipSegments">skip segments from apex</label>
+                    <input type="text" id="skipSegments" placeholder="3" value="3" />
+                    <span class="pure-form-message-inline">how many</span>
+                </div>
+                </fieldset>
+            </form>
+            <button class="pure-button" onclick="calculate()">figure it out</button>
+            <button id="download" class="pure-button" disabled>download svg</button>
+        </div>
+        <div class="column">
+
+            <canvas id="sketch" width="1280" height="3000"></canvas>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
