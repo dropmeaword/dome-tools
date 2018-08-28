@@ -23,8 +23,8 @@ The dome has two distinct parts (see 1:10 scale model):
     - seen at festivals for 360 experiences, etc.
 
 - The one we will be building is called a Zip-Tie Dome and if you google for it you can learn more about this particular build.
-        - Nodes (joints), see prototypes
-        - We need to make these elements: 3-types of struts and 3-types of nodes
+    - Nodes (joints), see prototypes
+    - We need to make these elements: 3-types of struts and 3-types of nodes
 
 - Activities: cutting with a saw, labelling tubes, drilling tubes
 
