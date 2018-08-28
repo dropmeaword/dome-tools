@@ -1,5 +1,7 @@
 Make a dome together, the dome has to be up by Thursday around lunch time.
 
+[See week schedule here in this google document](https://goo.gl/SNCe5N).
+
 Think of it as a planetarium, a 360 degree screen to do projections of 360 content.
 
 The dome has two distinct parts:
